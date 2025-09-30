@@ -1,0 +1,39 @@
+[
+  {
+    "ContainingType": "TestAPI.Controllers.ExamsController",
+    "Method": "GetExamForStudent",
+    "RelativePath": "api/Exams/{examId}/student/{studentId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "examId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "studentId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TestAPI.Controllers.ExamsController",
+    "Method": "Submit",
+    "RelativePath": "api/Exams/submit",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TestAPI.DTOs.SubmitExamDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
