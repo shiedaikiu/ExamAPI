@@ -1,0 +1,37 @@
+
+DECLARE @ExamId INT = 1;
+
+WITH ExamQuestions AS (
+    SELECT q.Id
+    FROM Question q
+    WHERE q.ExamId = @ExamId
+),
+TotalQuestions AS (
+    SELECT COUNT(*) AS TotalQ FROM ExamQuestions
+),
+StudentAnswerFlags AS (
+    SELECT
+        se.StudentId,
+        sa.Id AS StudentAnswerId,
+        CASE WHEN sa.AnsweredAt >= e.StartDateTime AND sa.AnsweredAt <= e.EndDateTime THEN 1 ELSE 0 END AS IsInsideWindow
+    FROM StudentAnswer sa
+    INNER JOIN StudentExam se ON sa.StudentExamId = se.Id
+    INNER JOIN Exam e ON se.ExamId = e.Id
+    WHERE se.ExamId = @ExamId
+),
+PerStudent AS (
+    SELECT
+        sa.StudentId,
+        SUM(1) AS TotalAnswered,
+        SUM(CASE WHEN IsInsideWindow = 1 THEN 1 ELSE 0 END) AS InsideCount,
+        SUM(CASE WHEN IsInsideWindow = 0 THEN 1 ELSE 0 END) AS OutsideCount
+    FROM StudentAnswerFlags sa
+    GROUP BY sa.StudentId
+)
+SELECT s.Id AS StudentId, s.FullName, p.TotalAnswered, p.InsideCount, p.OutsideCount
+FROM PerStudent p
+INNER JOIN Student s ON s.Id = p.StudentId
+CROSS JOIN TotalQuestions tq
+WHERE p.TotalAnswered = tq.TotalQ
+  AND p.InsideCount = (tq.TotalQ / 2)  -- دقیقاً نصف داخل
+  AND p.OutsideCount = (tq.TotalQ / 2); -- دقیقاً نصف خارج

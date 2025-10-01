@@ -1,0 +1,34 @@
+2) گزارش افرادی که آزمون را نداده‌اند بر اساس گروه آزمون
+
+دو حالت ممکن:
+
+افرادی که اصلاً هیچ StudentExam یا هیچ StudentAnswer ندارند.
+
+یا کسانی که StudentExam دارند اما IsSubmitted = false.
+
+اینجا کوئری برای «دانشجویان گروهی که هیچ ثبت‌نام/پاسخی برای آزمون مشخص نداشته‌اند»:
+
+-- پارامتر: @ExamId
+DECLARE @ExamId INT = 1;
+
+SELECT st.Id AS StudentId, st.FullName, g.Id AS GroupId, g.Name AS GroupName
+FROM Student st
+INNER JOIN [Group] g ON st.GroupId = g.Id
+WHERE g.Id = (
+    SELECT GroupId FROM Exam WHERE Id = @ExamId
+)
+AND NOT EXISTS (
+    SELECT 1 FROM StudentExam se WHERE se.StudentId = st.Id AND se.ExamId = @ExamId
+);
+
+
+
+اگر بخوایم کسانی که رکورد StudentExam دارند ولی IsSubmitted = 0 هم جزو «نداده‌ها» حساب بشن:
+
+SELECT st.Id AS StudentId, st.FullName, g.Id AS GroupId, g.Name AS GroupName
+FROM Student st
+INNER JOIN [Group] g ON st.GroupId = g.Id
+WHERE g.Id = (SELECT GroupId FROM Exam WHERE Id = @ExamId)
+AND NOT EXISTS (
+    SELECT 1 FROM StudentExam se WHERE se.StudentId = st.Id AND se.ExamId = @ExamId AND se.IsSubmitted = 1
+);
